@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  user-service-db:
+    container_name: user-service-db
+    image: postgres:17
+    ports:
+      - 5437:5432
+    environment:
+      POSTGRES_USER: userserviceadmin
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: user-service
