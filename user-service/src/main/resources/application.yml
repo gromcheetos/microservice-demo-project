@@ -1,10 +1,17 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5437/user-service
+    url: jdbc:postgresql://localhost:5437/pl_user_service
     username: userserviceadmin
     password: pass
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
+  flyway:
+    enabled: true
+    locations: classpath:database/migrations/
+    schemas: user_service
+    baselineOnMigrate: true
+    out-of-order: true
+
