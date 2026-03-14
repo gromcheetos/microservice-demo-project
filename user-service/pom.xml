@@ -39,6 +39,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope> <!-- only on the test classpath -->
         </dependency>
+        <!--        Flyway that will manage the database state -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <!-- no <version> needed — Spring Boot BOM supplies it -->
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -46,11 +52,14 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration><excludes>
-                    <exclude> <!-- Lombok is compile-only; strip it from the JAR --><groupId>org.projectlombok</groupId>
-                        <artifactId>lombok</artifactId>
-                    </exclude>
-                </excludes></configuration>
+                <configuration>
+                    <excludes>
+                        <exclude> <!-- Lombok is compile-only; strip it from the JAR -->
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
