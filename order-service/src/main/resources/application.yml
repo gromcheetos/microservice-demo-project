@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5438/pl_order_service
+    username: orderserviceadmin
+    password: pass
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  flyway:
+    enabled: true
+    locations: classpath:database/migrations/
+    schemas: order_service
+    baselineOnMigrate: true
+    out-of-order: true
+
