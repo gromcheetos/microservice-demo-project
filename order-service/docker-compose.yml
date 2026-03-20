@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  user-service-db:
+    container_name: order_service_db
+    image: postgres:17
+    ports:
+      - 5438:5432
+    environment:
+      POSTGRES_USER: orderserviceadmin
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: pl_order_service
