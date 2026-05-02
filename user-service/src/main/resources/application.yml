@@ -15,3 +15,10 @@ spring:
     baselineOnMigrate: true
     out-of-order: true
 
+keycloak:
+  server-url: http://localhost:8180
+  realm: ecommerce
+  client-id: user-service-client
+  client-secret: PASTE_YOUR_SECRET_HERE
+  admin-username: admin
+  admin-password: admin

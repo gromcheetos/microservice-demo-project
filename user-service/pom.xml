@@ -45,6 +45,11 @@
             <artifactId>flyway-core</artifactId>
             <!-- no <version> needed — Spring Boot BOM supplies it -->
         </dependency>
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-admin-client</artifactId>
+            <version>24.0.1</version> <!-- must match Keycloak server version -->
+        </dependency>
     </dependencies>
     <build>
         <plugins>
