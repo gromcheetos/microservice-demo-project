@@ -18,6 +18,7 @@ import java.util.UUID;
 @Table(name="platform_users")
 public class PlatformUser {
 
+    // comment
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
