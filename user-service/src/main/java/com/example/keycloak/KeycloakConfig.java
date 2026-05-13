@@ -10,10 +10,26 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@RequiredArgsConstructor
+@EnableConfigurationProperties(KeycloakProperties.class)  // registers the bean — no @Component needed on KeycloakProperties
 public class KeycloakConfig {
+
     private final KeycloakProperties props;
 
+    public KeycloakConfig(KeycloakProperties props) {
+        this.props = props;
+    }
+
+    /**
+     * Master realm client.
+     *
+     * Authenticates against the "master" realm using admin credentials.
+     * Use this ONLY for realm-level operations:
+     *   - Creating or deleting a realm
+     *   - Listing all realms
+     *
+     * Do NOT use this for everyday user/role/client management —
+     * use keycloakAdminClient for those.
+     */
     @Bean(name = "keycloakMasterClient", destroyMethod = "close")
     public Keycloak keycloakMasterClient() {
         return KeycloakBuilder.builder()
@@ -26,6 +42,18 @@ public class KeycloakConfig {
                 .build();
     }
 
+    /**
+     * Application realm admin client.
+     *
+     * Authenticates against your target realm using the client credentials
+     * (client_credentials grant). Use this for all day-to-day admin operations:
+     *   - Managing users (create, update, delete)
+     *   - Assigning roles
+     *   - Managing client scopes
+     *
+     * Requires the client to have "Service Account Roles" enabled in Keycloak
+     * with the "realm-management" roles assigned to its service account.
+     */
     @Bean(name = "keycloakAdminClient", destroyMethod = "close")
     public Keycloak keycloakAdminClient() {
         return KeycloakBuilder.builder()

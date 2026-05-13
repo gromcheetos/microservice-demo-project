@@ -20,17 +20,23 @@ import java.util.List;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
+
 public class KeycloakInitializer implements ApplicationRunner {
-    // Use master client for realm creation
-    @Qualifier("keycloakMasterClient")
+
     private final Keycloak masterClient;
-
-    // Use admin client for everything inside the realm
-    @Qualifier("keycloakAdminClient")
     private final Keycloak adminClient;
-
     private final KeycloakProperties props;
+
+
+    public KeycloakInitializer(
+            @Qualifier("keycloakMasterClient") Keycloak masterClient,
+            @Qualifier("keycloakAdminClient") Keycloak adminClient,
+            KeycloakProperties props
+    ) {
+        this.masterClient = masterClient;
+        this.adminClient = adminClient;
+        this.props = props;
+    }
 
     // Define the roles your application needs
     private static final List<String> REQUIRED_ROLES = List.of("ROLE_USER", "ROLE_ADMIN");
@@ -75,7 +81,7 @@ public class KeycloakInitializer implements ApplicationRunner {
     // ----------------------------------------------------------------
 
     private void initClient() {
-        boolean clientExists = adminClient.realm(props.getRealm())
+        boolean clientExists = masterClient.realm(props.getRealm())  // ← masterClient, not adminClient
                 .clients()
                 .findByClientId(props.getClientId())
                 .stream()
@@ -90,11 +96,11 @@ public class KeycloakInitializer implements ApplicationRunner {
         client.setClientId(props.getClientId());
         client.setSecret(props.getClientSecret());
         client.setEnabled(true);
-        client.setServiceAccountsEnabled(true);   // required for client_credentials grant
-        client.setDirectAccessGrantsEnabled(true); // required for password grant (dev/testing)
-        client.setPublicClient(false);             // confidential client
+        client.setServiceAccountsEnabled(true);
+        client.setDirectAccessGrantsEnabled(true);
+        client.setPublicClient(false);
 
-        try (Response response = adminClient.realm(props.getRealm()).clients().create(client)) {
+        try (Response response = masterClient.realm(props.getRealm()).clients().create(client)) {  // ← masterClient
             if (response.getStatus() == 201) {
                 log.info("Client '{}' created successfully.", props.getClientId());
             } else {
@@ -108,7 +114,7 @@ public class KeycloakInitializer implements ApplicationRunner {
     // ----------------------------------------------------------------
 
     private void initRoles() {
-        List<String> existingRoles = adminClient.realm(props.getRealm())
+        List<String> existingRoles = masterClient.realm(props.getRealm())  // ← masterClient
                 .roles()
                 .list()
                 .stream()
@@ -125,7 +131,7 @@ public class KeycloakInitializer implements ApplicationRunner {
             role.setName(roleName);
             role.setDescription("Auto-created role: " + roleName);
 
-            adminClient.realm(props.getRealm()).roles().create(role);
+            masterClient.realm(props.getRealm()).roles().create(role);  // ← masterClient
             log.info("Role '{}' created successfully.", roleName);
         }
     }
