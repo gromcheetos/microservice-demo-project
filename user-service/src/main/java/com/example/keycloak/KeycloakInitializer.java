@@ -20,7 +20,6 @@ import java.util.List;
 
 @Slf4j
 @Component
-
 public class KeycloakInitializer implements ApplicationRunner {
 
     private final Keycloak masterClient;

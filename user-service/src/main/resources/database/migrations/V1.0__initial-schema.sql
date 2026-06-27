@@ -1,7 +1,5 @@
 -- V1__initial-schema.sql
 
-CREATE SCHEMA IF NOT EXISTS user_service;
-
 CREATE TABLE IF NOT EXISTS user_service.platform_users
 (
     id    UUID         NOT NULL,

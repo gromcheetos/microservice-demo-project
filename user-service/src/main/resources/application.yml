@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5437/pl_user_service
-    username: userserviceadmin
-    password: pass
+    url: jdbc:postgresql://localhost:5437/pl_ecommerce_app
+    username: admin
+    password: admin
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -11,6 +11,7 @@ spring:
   flyway:
     enabled: true
     locations: classpath:database/migrations/
+    callbacks: classpath:database/migrations/callback/beforeMigrate.sql
     schemas: user_service
     baselineOnMigrate: true
     out-of-order: true
