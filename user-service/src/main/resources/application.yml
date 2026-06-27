@@ -14,4 +14,13 @@ spring:
     schemas: user_service
     baselineOnMigrate: true
     out-of-order: true
+keycloak:
+  server-url: http://localhost:8180        # maps to serverUrl
+  master-realm: master
+  master-client-id: admin-cli
+  master-username: admin
+  master-password: admin
+  realm: my-realm
+  client-id: my-client
+  client-secret: my-secret
 
