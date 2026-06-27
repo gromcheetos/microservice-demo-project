@@ -1,25 +1,21 @@
-INSERT INTO platform_users
+INSERT INTO user_service.platform_users
 (id,
  name,
  email,
  created_at,
- updated_at,
- updated_by)
+ updated_at)
 VALUES (gen_random_uuid(),
         'Alice Kim',
         'alice@example.com',
         NOW(),
-        NOW(),
-        NULL),
+        NOW()),
        (gen_random_uuid(),
         'Brian Lee',
         'brian@example.com',
         NOW(),
-        NOW(),
-        NULL),
+        NOW()),
        (gen_random_uuid(),
         'Chris Park',
         'chris@example.com',
         NOW(),
-        NOW(),
-        NULL);
+        NOW());

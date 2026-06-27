@@ -27,11 +27,8 @@ public class KeycloakInitializer implements ApplicationRunner {
     private final KeycloakProperties props;
 
 
-    public KeycloakInitializer(
-            @Qualifier("keycloakMasterClient") Keycloak masterClient,
-            @Qualifier("keycloakAdminClient") Keycloak adminClient,
-            KeycloakProperties props
-    ) {
+    public KeycloakInitializer(@Qualifier("keycloakMasterClient") Keycloak masterClient,
+                               @Qualifier("keycloakAdminClient") Keycloak adminClient, KeycloakProperties props) {
         this.masterClient = masterClient;
         this.adminClient = adminClient;
         this.props = props;
@@ -54,9 +51,7 @@ public class KeycloakInitializer implements ApplicationRunner {
     // ----------------------------------------------------------------
 
     private void initRealm() {
-        boolean realmExists = masterClient.realms().findAll()
-                .stream()
-                .anyMatch(r -> r.getRealm().equals(props.getRealm()));
+        boolean realmExists = masterClient.realms().findAll().stream().anyMatch(r -> r.getRealm().equals(props.getRealm()));
 
         if (realmExists) {
             log.info("Realm '{}' already exists — skipping creation.", props.getRealm());
@@ -81,10 +76,7 @@ public class KeycloakInitializer implements ApplicationRunner {
 
     private void initClient() {
         boolean clientExists = masterClient.realm(props.getRealm())  // ← masterClient, not adminClient
-                .clients()
-                .findByClientId(props.getClientId())
-                .stream()
-                .anyMatch(c -> c.getClientId().equals(props.getClientId()));
+                .clients().findByClientId(props.getClientId()).stream().anyMatch(c -> c.getClientId().equals(props.getClientId()));
 
         if (clientExists) {
             log.info("Client '{}' already exists — skipping creation.", props.getClientId());
@@ -114,11 +106,7 @@ public class KeycloakInitializer implements ApplicationRunner {
 
     private void initRoles() {
         List<String> existingRoles = masterClient.realm(props.getRealm())  // ← masterClient
-                .roles()
-                .list()
-                .stream()
-                .map(RoleRepresentation::getName)
-                .toList();
+                .roles().list().stream().map(RoleRepresentation::getName).toList();
 
         for (String roleName : REQUIRED_ROLES) {
             if (existingRoles.contains(roleName)) {
@@ -142,10 +130,7 @@ public class KeycloakInitializer implements ApplicationRunner {
 
     @SuppressWarnings("unused")
     private void initDefaultAdminUser(String username, String password) {
-        boolean userExists = !adminClient.realm(props.getRealm())
-                .users()
-                .search(username)
-                .isEmpty();
+        boolean userExists = !adminClient.realm(props.getRealm()).users().search(username).isEmpty();
 
         if (userExists) {
             log.info("User '{}' already exists — skipping.", username);
