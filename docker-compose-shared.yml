@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  ecommerce-db-shared:
+    container_name: ecommerce-app-db
+    image: postgres:17
+    ports:
+      - 5437:5432
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: pl_ecommerce_app
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

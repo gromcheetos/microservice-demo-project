@@ -1,19 +1,27 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5437/pl_user_service
-    username: userserviceadmin
-    password: pass
+    url: jdbc:postgresql://localhost:5437/pl_ecommerce_app
+    username: admin
+    password: admin
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: none
+      default_schema: user_service
     show-sql: true
   flyway:
     enabled: true
     locations: classpath:database/migrations/
+    callbacks: classpath:database/migrations/callback/beforeMigrate.sql
     schemas: user_service
     baselineOnMigrate: true
     out-of-order: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/my-realm
+
 keycloak:
   server-url: http://localhost:8180        # maps to serverUrl
   master-realm: master
@@ -21,6 +29,5 @@ keycloak:
   master-username: admin
   master-password: admin
   realm: my-realm
-  client-id: my-client
+  client-id: user-service-app
   client-secret: my-secret
-

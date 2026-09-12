@@ -1,38 +1,26 @@
 package com.example.keycloak;
 
-
-import com.example.KeycloakProperties;
 import jakarta.ws.rs.core.Response;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @Component
-
 public class KeycloakInitializer implements ApplicationRunner {
 
     private final Keycloak masterClient;
     private final Keycloak adminClient;
     private final KeycloakProperties props;
 
-
-    public KeycloakInitializer(
-            @Qualifier("keycloakMasterClient") Keycloak masterClient,
-            @Qualifier("keycloakAdminClient") Keycloak adminClient,
-            KeycloakProperties props
-    ) {
+    public KeycloakInitializer(@Qualifier("keycloakMasterClient") Keycloak masterClient,
+                               @Qualifier("keycloakAdminClient") Keycloak adminClient, KeycloakProperties props) {
         this.masterClient = masterClient;
         this.adminClient = adminClient;
         this.props = props;
@@ -55,9 +43,7 @@ public class KeycloakInitializer implements ApplicationRunner {
     // ----------------------------------------------------------------
 
     private void initRealm() {
-        boolean realmExists = masterClient.realms().findAll()
-                .stream()
-                .anyMatch(r -> r.getRealm().equals(props.getRealm()));
+        boolean realmExists = masterClient.realms().findAll().stream().anyMatch(r -> r.getRealm().equals(props.getRealm()));
 
         if (realmExists) {
             log.info("Realm '{}' already exists — skipping creation.", props.getRealm());
@@ -81,11 +67,12 @@ public class KeycloakInitializer implements ApplicationRunner {
     // ----------------------------------------------------------------
 
     private void initClient() {
-        boolean clientExists = masterClient.realm(props.getRealm())  // ← masterClient, not adminClient
+        // FIX: findByClientId returns a specific list filtering matches,
+        // but it requires a clean string query match.
+        boolean clientExists = !masterClient.realm(props.getRealm())
                 .clients()
                 .findByClientId(props.getClientId())
-                .stream()
-                .anyMatch(c -> c.getClientId().equals(props.getClientId()));
+                .isEmpty();
 
         if (clientExists) {
             log.info("Client '{}' already exists — skipping creation.", props.getClientId());
@@ -96,15 +83,23 @@ public class KeycloakInitializer implements ApplicationRunner {
         client.setClientId(props.getClientId());
         client.setSecret(props.getClientSecret());
         client.setEnabled(true);
-        client.setServiceAccountsEnabled(true);
-        client.setDirectAccessGrantsEnabled(true);
-        client.setPublicClient(false);
 
-        try (Response response = masterClient.realm(props.getRealm()).clients().create(client)) {  // ← masterClient
+        // Ensure standard Keycloak OIDC settings match your UI setups
+        client.setServiceAccountsEnabled(true);
+        client.setPublicClient(false);
+        client.setStandardFlowEnabled(true); // Standard Authorization Flow
+        client.setDirectAccessGrantsEnabled(true);
+
+        // Required in newer Keycloak versions if public client is false
+        client.setProtocol("openid-connect");
+
+        try (Response response = masterClient.realm(props.getRealm()).clients().create(client)) {
             if (response.getStatus() == 201) {
                 log.info("Client '{}' created successfully.", props.getClientId());
             } else {
-                log.error("Failed to create client '{}'. HTTP status: {}", props.getClientId(), response.getStatus());
+                // If it prints 403 here, your master admin lacks mapping privileges to target 'my-realm'
+                log.error("Failed to create client '{}'. HTTP status: {}, Error: {}",
+                        props.getClientId(), response.getStatus(), response.readEntity(String.class));
             }
         }
     }
@@ -114,12 +109,8 @@ public class KeycloakInitializer implements ApplicationRunner {
     // ----------------------------------------------------------------
 
     private void initRoles() {
-        List<String> existingRoles = masterClient.realm(props.getRealm())  // ← masterClient
-                .roles()
-                .list()
-                .stream()
-                .map(RoleRepresentation::getName)
-                .toList();
+        List<String> existingRoles = masterClient.realm(props.getRealm())
+                .roles().list().stream().map(RoleRepresentation::getName).toList();
 
         for (String roleName : REQUIRED_ROLES) {
             if (existingRoles.contains(roleName)) {
@@ -131,7 +122,7 @@ public class KeycloakInitializer implements ApplicationRunner {
             role.setName(roleName);
             role.setDescription("Auto-created role: " + roleName);
 
-            masterClient.realm(props.getRealm()).roles().create(role);  // ← masterClient
+            masterClient.realm(props.getRealm()).roles().create(role);
             log.info("Role '{}' created successfully.", roleName);
         }
     }
@@ -143,10 +134,7 @@ public class KeycloakInitializer implements ApplicationRunner {
 
     @SuppressWarnings("unused")
     private void initDefaultAdminUser(String username, String password) {
-        boolean userExists = !adminClient.realm(props.getRealm())
-                .users()
-                .search(username)
-                .isEmpty();
+        boolean userExists = !adminClient.realm(props.getRealm()).users().search(username).isEmpty();
 
         if (userExists) {
             log.info("User '{}' already exists — skipping.", username);
