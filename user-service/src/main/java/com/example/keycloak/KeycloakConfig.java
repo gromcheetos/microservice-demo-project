@@ -1,7 +1,5 @@
 package com.example.keycloak;
 
-import com.example.KeycloakProperties;
-import lombok.RequiredArgsConstructor;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;

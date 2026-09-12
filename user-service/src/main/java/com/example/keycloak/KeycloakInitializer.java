@@ -1,21 +1,14 @@
 package com.example.keycloak;
 
-
-import com.example.KeycloakProperties;
 import jakarta.ws.rs.core.Response;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -25,7 +18,6 @@ public class KeycloakInitializer implements ApplicationRunner {
     private final Keycloak masterClient;
     private final Keycloak adminClient;
     private final KeycloakProperties props;
-
 
     public KeycloakInitializer(@Qualifier("keycloakMasterClient") Keycloak masterClient,
                                @Qualifier("keycloakAdminClient") Keycloak adminClient, KeycloakProperties props) {
