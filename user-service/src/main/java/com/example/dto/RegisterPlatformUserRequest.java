@@ -7,4 +7,5 @@ public class RegisterPlatformUserRequest {
     private String name;
     private String email;
     private String password;
+
 }

@@ -25,4 +25,10 @@ keycloak:
   realm: my-realm
   client-id: my-client
   client-secret: my-secret
+security:
+  oauth2:
+    resourceserver:
+      jwt:
+        issuer-uri: http://localhost:8180/realms/my-realm
+
 
