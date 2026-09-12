@@ -67,8 +67,12 @@ public class KeycloakInitializer implements ApplicationRunner {
     // ----------------------------------------------------------------
 
     private void initClient() {
-        boolean clientExists = masterClient.realm(props.getRealm())  // ← masterClient, not adminClient
-                .clients().findByClientId(props.getClientId()).stream().anyMatch(c -> c.getClientId().equals(props.getClientId()));
+        // FIX: findByClientId returns a specific list filtering matches,
+        // but it requires a clean string query match.
+        boolean clientExists = !masterClient.realm(props.getRealm())
+                .clients()
+                .findByClientId(props.getClientId())
+                .isEmpty();
 
         if (clientExists) {
             log.info("Client '{}' already exists — skipping creation.", props.getClientId());
@@ -79,15 +83,23 @@ public class KeycloakInitializer implements ApplicationRunner {
         client.setClientId(props.getClientId());
         client.setSecret(props.getClientSecret());
         client.setEnabled(true);
-        client.setServiceAccountsEnabled(true);
-        client.setDirectAccessGrantsEnabled(true);
-        client.setPublicClient(false);
 
-        try (Response response = masterClient.realm(props.getRealm()).clients().create(client)) {  // ← masterClient
+        // Ensure standard Keycloak OIDC settings match your UI setups
+        client.setServiceAccountsEnabled(true);
+        client.setPublicClient(false);
+        client.setStandardFlowEnabled(true); // Standard Authorization Flow
+        client.setDirectAccessGrantsEnabled(true);
+
+        // Required in newer Keycloak versions if public client is false
+        client.setProtocol("openid-connect");
+
+        try (Response response = masterClient.realm(props.getRealm()).clients().create(client)) {
             if (response.getStatus() == 201) {
                 log.info("Client '{}' created successfully.", props.getClientId());
             } else {
-                log.error("Failed to create client '{}'. HTTP status: {}", props.getClientId(), response.getStatus());
+                // If it prints 403 here, your master admin lacks mapping privileges to target 'my-realm'
+                log.error("Failed to create client '{}'. HTTP status: {}, Error: {}",
+                        props.getClientId(), response.getStatus(), response.readEntity(String.class));
             }
         }
     }
@@ -97,7 +109,7 @@ public class KeycloakInitializer implements ApplicationRunner {
     // ----------------------------------------------------------------
 
     private void initRoles() {
-        List<String> existingRoles = masterClient.realm(props.getRealm())  // ← masterClient
+        List<String> existingRoles = masterClient.realm(props.getRealm())
                 .roles().list().stream().map(RoleRepresentation::getName).toList();
 
         for (String roleName : REQUIRED_ROLES) {
@@ -110,7 +122,7 @@ public class KeycloakInitializer implements ApplicationRunner {
             role.setName(roleName);
             role.setDescription("Auto-created role: " + roleName);
 
-            masterClient.realm(props.getRealm()).roles().create(role);  // ← masterClient
+            masterClient.realm(props.getRealm()).roles().create(role);
             log.info("Role '{}' created successfully.", roleName);
         }
     }

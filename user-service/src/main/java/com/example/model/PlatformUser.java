@@ -32,4 +32,5 @@ public class PlatformUser {
     private String email;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
 }

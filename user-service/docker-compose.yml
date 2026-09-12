@@ -12,6 +12,24 @@ services:
     networks:
       - user-net
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: pl_ecommerce_db
+    environment:
+      POSTGRES_DB: pl_ecommerce_app
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5437:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - user-net
+    restart: always
+
 networks:
   user-net:
     driver: bridge
+
+volumes:
+  pgdata:
