@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class UserResponse {
+public class PlatformUserResponse {
 
     private UUID id;
     private String name;

@@ -3,6 +3,6 @@ package com.example.dto;
 import lombok.Data;
 
 @Data
-public class UpdateUserRequest {
+public class UpdatePlatformUserRequest {
     private String name;
 }
